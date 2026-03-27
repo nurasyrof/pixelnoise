@@ -1,0 +1,35 @@
+---
+import { getCollection, render } from 'astro:content';
+import Post from '../../layouts/Post.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(post);
+
+// Extract raw body text for reading time calculation.
+// remarkPluginFrontmatter.words is injected by some remark plugins;
+// we fall back to a simple split on the raw body string.
+const rawContent: string = post.body ?? '';
+---
+
+<Post
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  heroImage={post.data.heroImage}
+  tags={post.data.tags}
+  category={post.data.category}
+  rawContent={rawContent}
+  slug={post.slug}
+>
+  <Content />
+</Post>

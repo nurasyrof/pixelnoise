@@ -1,0 +1,49 @@
+---
+title: "Why Design Systems Fail"
+description: "Design systems promise consistency and velocity, but most teams abandon them within two years. Here's what goes wrong."
+pubDate: 2024-02-01
+tags: ["design-systems", "ui-ux", "process"]
+category: "design"
+---
+
+Design systems are sold as a solution to the chaos of scaling product design. But walk into most mid-sized product teams and you'll find a graveyard of abandoned Figma libraries and half-documented component specs.
+
+## The adoption problem
+
+The most common failure mode isn't technical — it's organizational. A small group of motivated designers (or sometimes engineers) builds the system. They document it carefully. They demo it at an all-hands. And then... nothing. The rest of the team keeps using their own patterns. The system collects dust.
+
+Why? Because adoption requires changing how people work, not just giving them new tools. A design system that isn't embedded in the team's daily workflow is just a suggestion.
+
+## The ownership trap
+
+Design systems need owners. Not just contributors — owners. Someone who treats the system as their primary product responsibility, triages incoming issues, makes breaking-change decisions, and advocates for the system's health against the constant pressure of feature work.
+
+Most teams never assign this role explicitly. The system becomes everyone's responsibility, which means it becomes no one's responsibility.
+
+When a component breaks or goes stale, there's no one to fix it. Workarounds accumulate. Eventually, the system diverges so far from production that it becomes more friction than help.
+
+## Documentation rot
+
+Even well-intentioned documentation degrades over time. A component gets updated, but the docs don't. A new pattern emerges in production, but it was never added to the system. Engineers start reading the source code instead of the docs because the source is more reliable.
+
+Good documentation is an ongoing practice, not a one-time artifact. It requires the same discipline as the code itself.
+
+## The versioning problem
+
+At some point, a design system needs to evolve. New patterns. Breaking changes. Deprecations. If the system lacks a clear versioning and migration strategy, every update becomes a political negotiation. Teams resist upgrades because they've been burned before. The system forks.
+
+Semantic versioning, a changelog, and migration guides aren't glamorous. But they're the infrastructure that makes a design system trustworthy over time.
+
+## What actually works
+
+The teams I've seen succeed with design systems share a few things in common:
+
+1. **They treat it as a product.** Roadmaps, priorities, stakeholders, feedback loops. A design system without a product mindset is a project that will eventually end.
+
+2. **They start smaller than they think they should.** Fewer components, better documented, with real production usage. Breadth is the enemy of depth in early-stage systems.
+
+3. **They measure adoption.** If you don't know which components are being used and which are being bypassed, you can't improve.
+
+4. **They make contributing easy.** A system that only a core team can contribute to will always be a bottleneck. Good contribution guidelines and review processes turn the whole team into maintainers.
+
+The graveyard of abandoned design systems is full of technically excellent work that no one could sustain. The goal isn't to build the perfect system — it's to build the system your team will actually use.

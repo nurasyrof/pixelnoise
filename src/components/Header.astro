@@ -1,0 +1,31 @@
+---
+const navLinks = [
+  { href: '/blog', label: 'Blog' },
+  { href: '/tags', label: 'Tags' },
+];
+
+const currentPath = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+}
+---
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">
+      Pixel<span>Noise</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      {navLinks.map(({ href, label }) => (
+        <a
+          href={href}
+          aria-current={isActive(href) ? 'page' : undefined}
+        >
+          {label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>

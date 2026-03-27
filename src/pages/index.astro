@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostCard from '../components/PostCard.astro';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+
+const posts = allPosts.sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Base
+  title="Pixel Noise"
+  description="Writing on design, UI/UX, and the technology behind great digital experiences."
+>
+  <section class="hero">
+    <div class="container">
+      <span class="hero__eyebrow">Pixel Noise</span>
+      <h1 class="hero__title">Writing on design,<br />UI/UX, and tech.</h1>
+      <p class="hero__subtitle">
+        Thinking out loud about design systems, visual interfaces, and the
+        tools we use to build them.
+      </p>
+    </div>
+  </section>
+
+  <section aria-label="Blog posts">
+    <div class="container">
+      <p class="section-label">{posts.length} post{posts.length === 1 ? '' : 's'}</p>
+      {posts.length > 0 ? (
+        <div class="posts-list">
+          {posts.map((post) => (
+            <PostCard
+              slug={post.slug}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              tags={post.data.tags}
+              category={post.data.category}
+            />
+          ))}
+        </div>
+      ) : (
+        <p style="color: var(--color-fg-muted); padding-block: var(--space-16);">
+          No posts yet. Check back soon.
+        </p>
+      )}
+    </div>
+  </section>
+</Base>
