@@ -7,9 +7,10 @@ const blog = defineCollection({
     description: z.string(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    heroImage: z.string().optional(),
+    coverImage: z.string().optional(),
     tags: z.array(z.string()).default([]),
-    category: z.enum(['design', 'ui-ux', 'tech', 'misc']).default('misc'),
+    category: z.string().default('misc'),
+    readTime: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

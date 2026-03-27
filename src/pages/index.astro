@@ -1,51 +1,100 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import PostCard from '../components/PostCard.astro';
+import { getCollection } from 'astro:content';
 
-const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const posts = allPosts.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+const featuredPost = allPosts[0];
+const previewPosts = allPosts.slice(1, 4);
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+}
 ---
+<Base title="Pixel Noise" description="Get inspired by the latest in design, technology, news, and rumors.">
 
-<Base
-  title="Pixel Noise"
-  description="Writing on design, UI/UX, and the technology behind great digital experiences."
->
-  <section class="hero">
-    <div class="container">
-      <span class="hero__eyebrow">Pixel Noise</span>
-      <h1 class="hero__title">Writing on design,<br />UI/UX, and tech.</h1>
-      <p class="hero__subtitle">
-        Thinking out loud about design systems, visual interfaces, and the
-        tools we use to build them.
-      </p>
-    </div>
-  </section>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-inner">
+      <!-- Featured Article (left, 743px) -->
+      {featuredPost && (
+        <div class="featured-card">
+          {featuredPost.data.coverImage
+            ? <img class="featured-card-image" src={featuredPost.data.coverImage} alt={featuredPost.data.title} />
+            : <div class="featured-card-image-placeholder"></div>
+          }
+          <div class="featured-card-body">
+            <div class="featured-card-top">
+              <div class="featured-card-heading">
+                <div class="meta-row">
+                  <span>{formatDate(featuredPost.data.pubDate)}</span>
+                  <span class="meta-sep">·</span>
+                  <span>{featuredPost.data.readTime || '4 min read'}</span>
+                </div>
+                <h2 class="featured-card-title">
+                  <a href={`/blog/${featuredPost.slug}`} style="text-decoration:none;color:inherit;">{featuredPost.data.title}</a>
+                </h2>
+              </div>
+              <div class="featured-card-tags">
+                {featuredPost.data.tags.map(tag => (
+                  <a href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`} class="tag">{tag}</a>
+                ))}
+              </div>
+            </div>
+            <div class="featured-card-description">
+              <p class="featured-card-desc-text">{featuredPost.data.description}</p>
+              <a href={`/blog/${featuredPost.slug}`} class="read-more">Read More</a>
+            </div>
+          </div>
+        </div>
+      )}
 
-  <section aria-label="Blog posts">
-    <div class="container">
-      <p class="section-label">{posts.length} post{posts.length === 1 ? '' : 's'}</p>
-      {posts.length > 0 ? (
-        <div class="posts-list">
-          {posts.map((post) => (
-            <PostCard
-              slug={post.slug}
-              title={post.data.title}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
-              tags={post.data.tags}
-              category={post.data.category}
-            />
+      <!-- Small cards + Article previews (right side) -->
+      <div style="display: flex; gap: 20px; padding-left: 30px; align-items: flex-start;">
+        <!-- Small card placeholders -->
+        <div class="small-cards-col">
+          {previewPosts.map(_ => <div class="small-card"></div>)}
+        </div>
+        <!-- Article previews -->
+        <div class="article-previews" style="flex: 1; padding-left: 0;">
+          {previewPosts.map(post => (
+            <div class="article-preview">
+              <div class="meta-row">
+                <span>{formatDate(post.data.pubDate)}</span>
+                <span class="meta-sep">·</span>
+                <span>{post.data.readTime || '4 min read'}</span>
+              </div>
+              <a href={`/blog/${post.slug}`} class="article-preview-title">{post.data.title}</a>
+            </div>
           ))}
         </div>
-      ) : (
-        <p style="color: var(--color-fg-muted); padding-block: var(--space-16);">
-          No posts yet. Check back soon.
-        </p>
-      )}
+      </div>
     </div>
   </section>
+
+  <div class="container">
+    <!-- Highlighted Cards Row -->
+    <div class="highlighted-row">
+      {[1,2,3,4,5].map(_ => <div class="highlight-card"></div>)}
+    </div>
+
+    <!-- Article Grid -->
+    <div class="article-grid-section">
+      <div class="article-grid">
+        {allPosts.map(post => (
+          <div class="article-grid-item">
+            <a href={`/blog/${post.slug}`} class="article-grid-card">
+              {post.data.coverImage
+                ? <img src={post.data.coverImage} alt={post.data.title} />
+                : <div class="article-grid-card-placeholder"></div>
+              }
+            </a>
+            <span class="article-grid-category">{post.data.category}</span>
+            <a href={`/blog/${post.slug}`} class="article-grid-title">{post.data.title}</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
 </Base>

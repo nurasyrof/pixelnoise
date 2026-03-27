@@ -1,65 +1,42 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import PostCard from '../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-
-  // Collect every unique tag
-  const allTags = new Set<string>();
-  for (const post of allPosts) {
-    for (const tag of post.data.tags) {
-      allTags.add(tag);
-    }
-  }
-
-  return [...allTags].map((tag) => {
-    const filtered = allPosts
-      .filter((post) => post.data.tags.includes(tag))
-      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-    return {
-      params: { tag },
-      props: { tag, posts: filtered },
-    };
-  });
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap(p => p.data.tags.map(t => t.toLowerCase().replace(/\s+/g, '-'))))];
+  return tags.map(tag => ({ params: { tag }, props: { tag } }));
 }
 
-const { tag, posts } = Astro.props;
+const { tag } = Astro.props;
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .filter(p => p.data.tags.some(t => t.toLowerCase().replace(/\s+/g, '-') === tag))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const tagLabel = tag.replace(/-/g, ' ');
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+}
 ---
-
-<Base
-  title={`Tag: ${tag}`}
-  description={`All posts tagged with "${tag}" on Pixel Noise.`}
->
-  <div class="container">
-    <header class="page-header">
-      <p class="page-header__label">
-        <a href="/tags" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">Tags</a>
-        {' '}/ {tag}
-      </p>
-      <h1 class="page-header__title">#{tag}</h1>
-      <p class="page-header__description">
-        {posts.length} post{posts.length === 1 ? '' : 's'} tagged with &ldquo;{tag}&rdquo;.
-      </p>
-    </header>
-
-    {posts.length > 0 ? (
-      <div class="posts-list">
-        {posts.map((post) => (
-          <PostCard
-            slug={post.slug}
-            title={post.data.title}
-            description={post.data.description}
-            pubDate={post.data.pubDate}
-            tags={post.data.tags}
-            category={post.data.category}
-          />
-        ))}
-      </div>
-    ) : (
-      <p style="color: var(--color-fg-muted);">No posts found for this tag.</p>
-    )}
+<Base title={`${tagLabel} — Pixel Noise`} description={`Articles tagged "${tagLabel}" on Pixel Noise.`}>
+  <div class="page-header">
+    <h1>{tagLabel}</h1>
+  </div>
+  <div class="container" style="padding-top: 48px; padding-bottom: 96px;">
+    <div class="article-grid">
+      {allPosts.map(post => (
+        <div class="article-grid-item">
+          <a href={`/blog/${post.slug}`} class="article-grid-card">
+            {post.data.coverImage
+              ? <img src={post.data.coverImage} alt={post.data.title} />
+              : <div class="article-grid-card-placeholder"></div>
+            }
+          </a>
+          <span class="article-grid-category">{post.data.category}</span>
+          <a href={`/blog/${post.slug}`} class="article-grid-title">{post.data.title}</a>
+        </div>
+      ))}
+    </div>
   </div>
 </Base>

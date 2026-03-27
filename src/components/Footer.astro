@@ -1,12 +1,30 @@
 ---
 const year = new Date().getFullYear();
 ---
-
 <footer class="site-footer">
-  <div class="container">
-    <p>&copy; {year} Pixel Noise. All rights reserved.</p>
-    <p>
-      <a href="/rss.xml" aria-label="RSS feed">RSS</a>
-    </p>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-brand-logo">Pixel<span class="noise">Noise</span></div>
+      <p class="footer-tagline">Get inspired by the latest in design, technology, news, and rumors. Stay tuned for more updates!</p>
+    </div>
+    <div class="footer-about">
+      <div class="footer-col-heading">About</div>
+      <ul class="footer-links">
+        <li><a href="/about">Information</a></li>
+        <li><a href="/advertising">Advertising</a></li>
+        <li><a href="/submit">Submit work/article</a></li>
+        <li><a href="/terms">Terms and privacy</a></li>
+      </ul>
+    </div>
+    <div class="footer-newsletter">
+      <div class="footer-col-heading">Newsletter</div>
+      <p class="footer-newsletter-sub">More awesome inspiration, delivered directly to your inbox.</p>
+      <a href="#newsletter" class="footer-subscribe">Subscribe now</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© Pixel Noise {year}</span>
+    <span>All images copyright to their respective owners.</span>
+    <span>Curated, designed and built by <a href="https://github.com/nurasyrof" target="_blank" rel="noopener">nurasyrof</a></span>
   </div>
 </footer>

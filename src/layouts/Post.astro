@@ -1,111 +1,80 @@
 ---
 import Base from './Base.astro';
-import TagList from '../components/TagList.astro';
+import { getCollection } from 'astro:content';
 
 interface Props {
   title: string;
   description: string;
   pubDate: Date;
   updatedDate?: Date;
-  heroImage?: string;
+  coverImage?: string;
   tags: string[];
   category: string;
-  rawContent?: string;
+  readTime?: string;
   slug: string;
 }
 
-const {
-  title,
-  description,
-  pubDate,
-  updatedDate,
-  heroImage,
-  tags,
-  category,
-  rawContent = '',
-  slug,
-} = Astro.props;
+const { title, description, pubDate, coverImage, tags, category, readTime, slug } = Astro.props;
 
-// Reading time: average 200 words per minute
-const wordCount = rawContent.trim().split(/\s+/).filter(Boolean).length;
-const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200));
-const readingTime = `${readingTimeMinutes} min read`;
+// Get prev/next posts
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = allPosts.findIndex(p => p.slug === slug);
+const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
 
-const formattedPubDate = pubDate.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+const formattedDate = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(pubDate);
 
-const formattedUpdatedDate = updatedDate
-  ? updatedDate.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  : null;
-
-const canonicalURL = new URL(`/blog/${slug}`, Astro.site);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
-
-<Base
-  title={title}
-  description={description}
-  image={heroImage}
-  canonicalURL={canonicalURL}
-  type="article"
->
-  <article>
-    <div class="container">
-      <header class="post-header">
-        <div class="post-header__meta">
-          <span class="post-header__category">{category}</span>
-          <span aria-hidden="true" style="color: var(--color-border);">·</span>
-          <time
-            class="post-header__date"
-            datetime={pubDate.toISOString()}
-            title={formattedPubDate}
-          >
-            {formattedPubDate}
-          </time>
-          <span aria-hidden="true" style="color: var(--color-border);">·</span>
-          <span class="post-header__reading-time">{readingTime}</span>
-        </div>
-
-        <h1 class="post-header__title">{title}</h1>
-        <p class="post-header__description">{description}</p>
-
-        {tags.length > 0 && (
-          <div class="post-header__tags">
-            <TagList tags={tags} linked={true} />
-          </div>
-        )}
-
-        {formattedUpdatedDate && (
-          <p style="margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-muted);">
-            Last updated: <time datetime={updatedDate?.toISOString()}>{formattedUpdatedDate}</time>
-          </p>
-        )}
-      </header>
-
-      {heroImage && (
-        <img
-          src={heroImage}
-          alt=""
-          role="presentation"
-          style="width: 100%; border-radius: var(--radius-lg); margin-bottom: var(--space-10); aspect-ratio: 16/9; object-fit: cover;"
-        />
-      )}
-
-      <div class="prose">
-        <slot />
+<Base title={title} description={description} canonicalURL={canonicalURL}>
+  <!-- Post Hero -->
+  <section class="post-hero">
+    <div class="post-hero-inner">
+      {coverImage
+        ? <img class="post-hero-image" src={coverImage} alt={title} />
+        : <div class="post-hero-image" style="background: var(--color-card-placeholder);"></div>
+      }
+      <div class="post-hero-meta">
+        <span>{formattedDate}</span>
+        <span class="meta-sep">·</span>
+        <span>{readTime || '4 min read'}</span>
       </div>
-
-      <footer class="post-footer">
-        <a href="/blog" class="post-footer__back">
-          &larr; All posts
-        </a>
-      </footer>
+      <h1 class="post-hero-title">{title}</h1>
     </div>
-  </article>
+  </section>
+
+  <!-- Tags -->
+  <div class="post-tags-row">
+    {tags.map(tag => (
+      <a href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`} class="tag-lg">{tag}</a>
+    ))}
+  </div>
+
+  <!-- Subtitle / Description -->
+  <div style="max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-pad);">
+    <p class="post-subtitle" style="padding: 0; width: 385px;">{description}</p>
+  </div>
+
+  <!-- Divider -->
+  <hr class="post-divider" />
+
+  <!-- Content -->
+  <div class="post-content-wrap">
+    <article class="prose">
+      <slot />
+    </article>
+  </div>
+
+  <!-- Prev/Next nav -->
+  <nav class="post-nav" aria-label="Post navigation">
+    {prevPost
+      ? <a href={`/blog/${prevPost.slug}`}>← {prevPost.data.title}</a>
+      : <span></span>
+    }
+    {nextPost
+      ? <a href={`/blog/${nextPost.slug}`} style="text-align:right">{nextPost.data.title} →</a>
+      : <span></span>
+    }
+  </nav>
 </Base>

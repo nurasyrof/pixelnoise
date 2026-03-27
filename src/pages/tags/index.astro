@@ -1,50 +1,27 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
 
-const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-
-// Build a map of tag -> post count
+const posts = await getCollection('blog', ({ data }) => !data.draft);
 const tagMap = new Map<string, number>();
-
-for (const post of allPosts) {
-  for (const tag of post.data.tags) {
-    tagMap.set(tag, (tagMap.get(tag) ?? 0) + 1);
-  }
-}
-
-// Sort tags alphabetically
+posts.forEach(post => {
+  post.data.tags.forEach(tag => {
+    tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+  });
+});
 const tags = [...tagMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 ---
-
-<Base
-  title="Tags"
-  description="Browse all tags on Pixel Noise. Find posts about design systems, UI/UX, process, and more."
->
-  <div class="container">
-    <header class="page-header">
-      <p class="page-header__label">Browse by tag</p>
-      <h1 class="page-header__title">Tags</h1>
-      <p class="page-header__description">
-        {tags.length} tag{tags.length === 1 ? '' : 's'} across {allPosts.length} post{allPosts.length === 1 ? '' : 's'}.
-      </p>
-    </header>
-
-    {tags.length > 0 ? (
-      <ul class="tag-index-list" role="list">
-        {tags.map(([tag, count]) => (
-          <li>
-            <a href={`/tags/${tag}`} class="tag-index-item">
-              {tag}
-              <span class="tag-index-item__count" aria-label={`${count} post${count === 1 ? '' : 's'}`}>
-                {count}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p style="color: var(--color-fg-muted);">No tags yet.</p>
-    )}
+<Base title="Tags — Pixel Noise" description="Browse all tags on Pixel Noise.">
+  <div class="page-header">
+    <h1>Tags</h1>
+  </div>
+  <div class="container" style="padding-top: 48px; padding-bottom: 96px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+      {tags.map(([tag, count]) => (
+        <a href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`} class="tag-lg">
+          {tag} <span style="margin-left: 6px; opacity: 0.5;">({count})</span>
+        </a>
+      ))}
+    </div>
   </div>
 </Base>
